@@ -1,0 +1,110 @@
+#include <iostream>
+using namespace std;
+
+// Node definition
+class Node {
+public:
+    int data;
+    Node* left;
+    Node* right;
+
+    Node(int val) {
+        data = val;
+        left = right = nullptr;
+    }
+};
+
+// Queue class for BFS
+class Queue {
+public:
+    Node** arr;
+    int front, rear, size, capacity;
+
+    Queue(int c) {
+        capacity = c;
+        arr = new Node*[capacity];
+        front = rear = -1;
+        size = 0;
+    }
+
+    void enqueue(Node* node) {
+        if (size == capacity) return;
+
+        if (rear == -1) front = rear = 0;
+        else rear = (rear + 1) % capacity;
+
+        arr[rear] = node;
+        size++;
+    }
+
+    Node* dequeue() {
+        if (size == 0) return nullptr;
+
+        Node* temp = arr[front];
+        if (front == rear) front = rear = -1;
+        else front = (front + 1) % capacity;
+
+        size--;
+        return temp;
+    }
+
+    bool isEmpty() {
+        return size == 0;
+    }
+};
+
+int main() {
+    // Create symmetric binary tree
+    Node* root = new Node(1);
+    root->left = new Node(2);
+    root->right = new Node(2);
+    root->left->left = new Node(3);
+    root->left->right = new Node(4);
+    root->right->left = new Node(4);
+    root->right->right = new Node(3);
+
+    // BFS using custom queue
+    Queue q(100);
+    q.enqueue(root);
+
+    cout << "BFS Traversal: ";
+    while (!q.isEmpty()) {
+        Node* curr = q.dequeue();
+        cout << curr->data << " ";
+        if (curr->left) q.enqueue(curr->left);
+        if (curr->right) q.enqueue(curr->right);
+    }
+    cout << endl;
+
+    // Check symmetry without isMirror function
+    bool result = true;
+
+    // Manual stack for pairs
+    Node* stack1[100], *stack2[100];
+    int top = -1;
+
+    stack1[++top] = root->left;
+    stack2[top] = root->right;
+
+    while (top >= 0) {
+        Node* n1 = stack1[top];
+        Node* n2 = stack2[top--];
+
+        if (!n1 && !n2) continue;
+        if (!n1 || !n2 || n1->data != n2->data) {
+            result = false;
+            break;
+        }
+
+        // Compare outer and inner pairs
+        stack1[++top] = n1->left;
+        stack2[top] = n2->right;
+
+        stack1[++top] = n1->right;
+        stack2[top] = n2->left;
+    }
+
+    cout << "Is tree symmetric? " << (result ? "true" : "false") << endl;
+
+    return 0;
+}
