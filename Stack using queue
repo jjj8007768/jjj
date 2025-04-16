@@ -1,0 +1,124 @@
+#include <iostream>
+using namespace std;
+
+// Basic Queue Implementation
+class Queue {
+    int* arr;
+    int front, rear, size, capacity;
+
+public:
+    Queue(int c) {
+        capacity = c;
+        arr = new int[capacity];
+        front = rear = -1;
+        size = 0;
+    }
+
+    ~Queue() {
+        delete[] arr;
+    }
+
+    void enqueue(int x) {
+        if (size == capacity) {
+            cout << "Queue Overflow\n";
+            return;
+        }
+        if (rear == -1) {
+            front = rear = 0;
+        } else {
+            rear = (rear + 1) % capacity;
+        }
+        arr[rear] = x;
+        size++;
+    }
+
+    int dequeue() {
+        if (size == 0) {
+            cout << "Queue Underflow\n";
+            return -1;
+        }
+        int val = arr[front];
+        if (front == rear) {  // only one element
+            front = rear = -1;
+        } else {
+            front = (front + 1) % capacity;
+        }
+        size--;
+        return val;
+    }
+
+    int getSize() {
+        return size;
+    }
+
+    bool isEmpty() {
+        return size == 0;
+    }
+};
+
+// Stack Using One Queue
+class Stack {
+    Queue* q;
+    int capacity;
+
+public:
+    Stack(int c) {
+        capacity = c;
+        q = new Queue(capacity);
+    }
+
+    ~Stack() {
+        delete q;
+    }
+
+    void push(int x) {
+        if (q->getSize() == capacity) {
+            cout << "Stack Overflow\n";
+            return;
+        }
+
+        q->enqueue(x);
+        int sz = q->getSize();
+
+        // Rotate the queue to make the last added element come to the front
+        for (int i = 0; i < sz - 1; i++) {
+            int temp = q->dequeue();
+            q->enqueue(temp);
+        }
+    }
+
+    void pop() {
+        if (q->isEmpty()) {
+            cout << "Stack Underflow\n";
+            return;
+        }
+        q->dequeue();
+    }
+
+    int top() {
+        if (q->isEmpty()) {
+            cout << "Stack is empty\n";
+            return -1;
+        }
+        return q->dequeue();  // remove and return front element
+    }
+
+    bool isEmpty() {
+        return q->isEmpty();
+    }
+};
+
+// Driver code
+int main() {
+    Stack s(10);
+
+    s.push(1);
+    s.push(2);
+    s.push(3);
+
+    cout << "Top: " << s.top() << endl;  // Should print 3
+    s.pop();
+    cout << "Top: " << s.top() << endl;  // Should print 2
+
+    return 0;
+}
